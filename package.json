@@ -11,23 +11,17 @@
     "preview": "node preview-server.mjs"
   },
   "dependencies": {
-    "d3-array": "^3.2.4",
-    "d3-geo": "^3.1.1",
-    "next": "14.2.15",
+    "next": "^14.2.35",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "topojson-client": "^3.1.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/d3-array": "^3.2.1",
-    "@types/d3-geo": "^3.1.0",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/topojson-client": "^3.1.5",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.15",
+    "eslint-config-next": "^14.2.35",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.5.2"
