@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* KLN Design System Tokens (Light Theme) */
+  --surface-100: #f4f7fb;
+  --surface-raised: #ffffff;
+  --surface-sunken: #e6edf6;
+  --ink: #0e2240;
+  --ink-muted: #44546b;
+  --line: #cad5e3;
+  --line-strong: #7388a3;
+  --brand: #1b54a8;
+  --brand-hover: #143f82;
+  --on-brand: #ffffff;
+  --brand-soft: #dce8f7;
+  --brand-ink: #133a78;
+  --sky: #2e8bc9;
+  --sky-soft: #d5eaf7;
+  --sky-ink: #12557f;
+  --sun: #f6c945;
+  --on-sun: #0e2240;
+  --sun-soft: #fcf0c4;
+  --sun-ink: #6e5200;
+  --ember: #e8832f;
+  --on-ember: #0e2240;
+  --ember-soft: #fbe3cc;
+  --ember-ink: #9a4308;
+  --leaf: #2f8438;
+  --on-leaf: #ffffff;
+  --leaf-soft: #dff0da;
+  --leaf-ink: #1d6428;
+  --danger: #b42318;
+  --on-danger: #ffffff;
+  --danger-soft: #fce4e1;
+  --focus: #0e2240;
+  --foot: #0e2240;
+  --foot-ink: #eaf1fa;
+  --foot-muted: #a9b9ce;
+  --shadow-sm: 0 1px 2px rgba(14, 34, 64, 0.1);
+  --shadow-md: 0 8px 24px rgba(14, 34, 64, 0.12);
+
+  /* Aliases for prototype & globe compatibility */
+  --s100: var(--surface-100);
+  --raised: var(--surface-raised);
+  --sunken: var(--surface-sunken);
+  --muted: var(--ink-muted);
+  --font-display: "Montserrat", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Globe aliases */
+  --g-sea: var(--surface-100);
+  --g-rim: var(--line-strong);
+  --g-grat: var(--line);
+  --g-land: var(--brand-soft);
+  --g-land-tint: var(--sky);
+  --g-land-edge: var(--brand);
+  --g-trail: var(--brand);
+  --g-origin: var(--ember);
+  --g-arrive: var(--sun);
+  --g-dest: var(--brand);
+  --g-plane: var(--surface-raised);
+  --g-plane-fold: var(--line);
+  --g-plane-edge: var(--brand-ink);
+  --g-shadow: var(--ink);
+  --g-label-bg: var(--surface-raised);
+  --g-label-line: var(--line);
+  --g-label-ink: var(--ink);
+}
+
+:root[data-theme="dark"] {
+  --surface-100: #0a1a30;
+  --surface-raised: #11284a;
+  --surface-sunken: #07111f;
+  --ink: #eaf1fa;
+  --ink-muted: #a9b9ce;
+  --line: #27415f;
+  --line-strong: #6f88a8;
+  --brand: #7db2f0;
+  --brand-hover: #a5c9f5;
+  --on-brand: #0a1a30;
+  --brand-soft: #183a68;
+  --brand-ink: #b9d5f8;
+  --sky: #5bb0e3;
+  --sky-soft: #133b57;
+  --sky-ink: #9ed3f2;
+  --sun: #f6c945;
+  --on-sun: #0e2240;
+  --sun-soft: #4a3c10;
+  --sun-ink: #f6d56b;
+  --ember: #f29a4e;
+  --on-ember: #0e2240;
+  --ember-soft: #4d2e14;
+  --ember-ink: #f7b882;
+  --leaf: #6fc176;
+  --on-leaf: #0a1a30;
+  --leaf-soft: #173d22;
+  --leaf-ink: #9ddda2;
+  --danger: #f28b82;
+  --on-danger: #0a1a30;
+  --danger-soft: #4a1d1a;
+  --focus: #f6c945;
+  --foot: #07111f;
+  --foot-ink: #eaf1fa;
+  --foot-muted: #a9b9ce;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+  --g-plane: var(--ink);
+  --g-plane-fold: var(--ink-muted);
+  --g-plane-edge: var(--surface-sunken);
+  --g-shadow: var(--surface-sunken);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-100);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@keyframes marqueeSlide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.kln-ribbon-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeSlide 46s linear infinite;
+}
+
+.kln-ribbon-view:hover .kln-ribbon-track {
+  animation-play-state: paused;
+}
+
+@keyframes typingBlink {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: none;
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.kln-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+  animation: typingBlink 1s infinite;
+}
+
+.kln-typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.kln-typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .kln-ribbon-track {
+    animation: none;
+  }
+}

@@ -1,0 +1,64 @@
+{
+ "v": 3,
+ "layout": "files",
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-04T03:40:00Z"
+ },
+ "title": "KLN",
+ "namespace": "KLN",
+ "libraries": [],
+ "sections": {},
+ "groups": [
+  "Logos"
+ ],
+ "assetGroups": {
+  "Logos": {
+   "name": "Logos",
+   "tile": "l",
+   "order": [
+    "kln-logo-navy.svg",
+    "kln-logo-white.svg",
+    "kln-logo-navy.png",
+    "kln-logo-white.png"
+   ],
+   "files": {
+    "kln-logo-navy.png": {
+     "name": "kln-logo-navy.png",
+     "blob": "5f72205687051fc93d759fb18fce2746",
+     "size": 50380,
+     "type": "image/png"
+    },
+    "kln-logo-white.png": {
+     "name": "kln-logo-white.png",
+     "blob": "30b8e1972282b9f485fce52009e71409",
+     "size": 46198,
+     "type": "image/png"
+    },
+    "kln-logo-navy.svg": {
+     "name": "kln-logo-navy.svg",
+     "blob": "5e64272e35762d41922bd867104a19c6",
+     "size": 3470,
+     "type": "image/svg+xml"
+    },
+    "kln-logo-white.svg": {
+     "name": "kln-logo-white.svg",
+     "blob": "8f6660d1eaf0460cbc55142c9f5da8ee",
+     "size": 3418,
+     "type": "image/svg+xml"
+    }
+   }
+  }
+ },
+ "blobs": {},
+ "docs": {
+  "readme": "project/README.md",
+  "sections": []
+ },
+ "lastChange": {
+  "by": "Yully",
+  "at": "2026-11-05T16:40:00Z",
+  "via": "Claude",
+  "note": "Logo SVG resmi ditambahkan; footer memakai kontak resmi KLN"
+ }
+}

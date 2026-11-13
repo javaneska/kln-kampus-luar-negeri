@@ -1,0 +1,44 @@
+<!-- @dsCard height=300 -->
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><title>Cover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600..800&family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<style>
+  body { margin: 0; padding: 0; background: var(--surface-100); }
+  .cv { position: relative; width: 960px; height: 300px; overflow: hidden; background: var(--surface-100); }
+  .cv svg { position: absolute; left: 0; top: 0; width: 960px; height: 300px; }
+  .cv .t { position: absolute; left: 40px; bottom: 32px; width: 400px; }
+  .cv h1 { margin: 0; font: 800 112px/0.95 var(--font-display); letter-spacing: -3px; color: var(--ink); }
+  .cv p { margin: 12px 0 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+  .brand { fill: var(--brand); } .sun { fill: var(--sun); } .leaf { fill: var(--leaf); } .sky { fill: var(--sky); } .ember { fill: var(--ember); } .soft { fill: var(--brand-soft); }
+  .tile { rx: var(--radius-md); ry: var(--radius-md); }
+  .arc { fill: none; stroke: var(--surface-100); stroke-width: 8px; }
+</style></head>
+<body>
+<div class="cv">
+<!--
+ derivation
+ blocks: brand 240x180, leaf 120x180, sun 120x120, sky 120x60, ember 120x120, brand-soft 240x120, brand 120x120; tiles inset by space-1 (2px each side), corners radius-md
+ arrangement: flush modular grid on a 60px unit from x=480, bleeding off the top and right edges; nothing left of x=480
+ pattern: three concentric half-circle arcs (r 60, 120, 180) in the ground colour, centred on the join at (720,180); the literal motif row, a sun rising over a horizon, because KLN is about heading out to a campus abroad
+ steps and radii: 8px stroke (space-2), tile gap 4px (space-1), radius-md corners
+-->
+<svg viewBox="0 0 960 300" aria-hidden="true">
+  <defs><clipPath id="reg"><rect x="480" y="0" width="480" height="300"/></clipPath></defs>
+  <g clip-path="url(#reg)">
+    <rect class="tile brand" x="482" y="2" width="236" height="176"/>
+    <rect class="tile sun" x="722" y="2" width="116" height="116"/>
+    <rect class="tile leaf" x="842" y="2" width="130" height="176"/>
+    <rect class="tile sky" x="722" y="122" width="116" height="56"/>
+    <rect class="tile ember" x="482" y="182" width="116" height="116"/>
+    <rect class="tile soft" x="602" y="182" width="236" height="116"/>
+    <rect class="tile brand" x="842" y="182" width="130" height="116"/>
+    <path class="arc" d="M660 180a60 60 0 0 1 120 0"/>
+    <path class="arc" d="M600 180a120 120 0 0 1 240 0"/>
+    <path class="arc" d="M540 180a180 180 0 0 1 360 0"/>
+  </g>
+</svg>
+<div class="t"><h1>KLN</h1><p>Satu rencana, banyak kampus dunia.</p></div>
+</div>
+</body>
+</html>

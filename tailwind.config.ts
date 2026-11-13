@@ -1,0 +1,75 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  darkMode: ["class", '[data-theme="dark"]'],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "surface-100": "var(--surface-100)",
+        "surface-raised": "var(--surface-raised)",
+        "surface-sunken": "var(--surface-sunken)",
+        ink: "var(--ink)",
+        "ink-muted": "var(--ink-muted)",
+        line: "var(--line)",
+        "line-strong": "var(--line-strong)",
+        brand: "var(--brand)",
+        "brand-hover": "var(--brand-hover)",
+        "on-brand": "var(--on-brand)",
+        "brand-soft": "var(--brand-soft)",
+        "brand-ink": "var(--brand-ink)",
+        sky: "var(--sky)",
+        "sky-soft": "var(--sky-soft)",
+        "sky-ink": "var(--sky-ink)",
+        sun: "var(--sun)",
+        "on-sun": "var(--on-sun)",
+        "sun-soft": "var(--sun-soft)",
+        "sun-ink": "var(--sun-ink)",
+        ember: "var(--ember)",
+        "on-ember": "var(--on-ember)",
+        "ember-soft": "var(--ember-soft)",
+        "ember-ink": "var(--ember-ink)",
+        leaf: "var(--leaf)",
+        "on-leaf": "var(--on-leaf)",
+        "leaf-soft": "var(--leaf-soft)",
+        "leaf-ink": "var(--leaf-ink)",
+        danger: "var(--danger)",
+        "on-danger": "var(--on-danger)",
+        "danger-soft": "var(--danger-soft)",
+        focus: "var(--focus)",
+      },
+      fontFamily: {
+        display: ["var(--font-display)", "Montserrat", "Plus Jakarta Sans", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
+      },
+      spacing: {
+        "space-1": "4px",
+        "space-2": "8px",
+        "space-3": "12px",
+        "space-4": "16px",
+        "space-5": "24px",
+        "space-6": "32px",
+        "space-7": "48px",
+        "space-8": "72px",
+      },
+      borderRadius: {
+        sm: "6px",
+        md: "10px",
+        lg: "16px",
+        xl: "24px",
+        pill: "999px",
+      },
+      boxShadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
