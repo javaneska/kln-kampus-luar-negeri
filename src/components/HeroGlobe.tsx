@@ -83,7 +83,6 @@ function easeInOut(x: number) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
-// Decode TopoJSON land geometry into an array of polygon rings ([lon, lat][])
 function decodeTopoLand(topo: any): [number, number][][] {
   if (!topo || !topo.arcs || !topo.objects?.land) return [];
   const scale = topo.transform?.scale || [1, 1];
@@ -139,20 +138,7 @@ export function HeroGlobe() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [paused, setPaused] = useState(false);
-  const [rotIndex, setRotIndex] = useState(0);
-  const [rotOut, setRotOut] = useState(false);
-
-  // Rotating country name under H1
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotOut(true);
-      setTimeout(() => {
-        setRotIndex((prev) => (prev + 1) % t.hero.rotCountries.length);
-        setRotOut(false);
-      }, 420);
-    }, 2700);
-    return () => clearInterval(interval);
-  }, [t.hero.rotCountries.length]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -188,7 +174,6 @@ export function HeroGlobe() {
       };
     });
 
-    // Build graticule lines
     const graticuleLines: [number, number][][] = [];
     for (let lon = -180; lon < 180; lon += CONFIG.graticuleStep) {
       const line: [number, number][] = [];
@@ -211,7 +196,7 @@ export function HeroGlobe() {
 
     const C: Record<string, string> = {};
     const readColors = () => {
-      const cs = getComputedStyle(document.documentElement);
+      const cs = getComputedStyle(wrap);
       [
         "sea",
         "rim",
@@ -233,7 +218,7 @@ export function HeroGlobe() {
       ].forEach((k) => {
         C[k] = cs.getPropertyValue(`--g-${k}`).trim() || "#1b54a8";
       });
-      C.font = cs.getPropertyValue("--font-sans").trim() || "sans-serif";
+      C.font = cs.getPropertyValue("--sans").trim() || "system-ui, sans-serif";
     };
 
     const resize = () => {
@@ -248,7 +233,6 @@ export function HeroGlobe() {
       cy = Math.max(H / 2, R + 2);
     };
 
-    // Orthographic projection centered at `center`
     const project = (ll: [number, number]): [number, number, boolean] => {
       const lam = (ll[0] - center[0]) * RAD;
       const phi = ll[1] * RAD;
@@ -323,7 +307,6 @@ export function HeroGlobe() {
       ctx.fill();
       ctx.clip();
 
-      // Graticule
       ctx.beginPath();
       for (const line of graticuleLines) {
         let started = false;
@@ -345,7 +328,6 @@ export function HeroGlobe() {
       ctx.lineWidth = 0.7;
       ctx.stroke();
 
-      // Land polygons
       if (landRings.length > 0) {
         ctx.beginPath();
         for (const ring of landRings) {
@@ -393,16 +375,22 @@ export function HeroGlobe() {
       ctx.stroke();
     };
 
-    const drawTrail = (r: (typeof routes)[0], p: number, alpha: number) => {
+    const drawTrail = (
+      r: (typeof routes)[0],
+      p: number,
+      alpha: number,
+      fullTrail = false
+    ) => {
       if (alpha <= 0) return;
       ctx.strokeStyle = C.trail;
       ctx.lineWidth = 1.7;
       ctx.lineCap = "round";
       const head = p * r.n;
+      const maxLen = fullTrail ? 1e9 : CONFIG.trailLengthRad;
       for (let k = 0; k < r.n && k + 1 <= head + 0.5; k++) {
         if (k % 3 === 2) continue;
         const behind = ((head - k) / r.n) * r.dist;
-        const a = alpha * Math.max(0, 1 - behind / CONFIG.trailLengthRad);
+        const a = alpha * Math.max(0, 1 - behind / maxLen);
         if (a <= 0.02 || !visible(r.pts[k]) || !visible(r.pts[k + 1])) continue;
         const p0 = project(r.pts[k]);
         const p1 = project(r.pts[k + 1]);
@@ -431,7 +419,6 @@ export function HeroGlobe() {
       const y = cy + (g[1] - cy) * k - R * CONFIG.altitude * 0.5 * lift;
       const s = Math.max(10, R * CONFIG.planeSize) * (1 + 0.22 * lift);
 
-      // Soft dual shadow on globe surface
       [
         [1.25, 0.07],
         [0.95, 0.13],
@@ -572,7 +559,26 @@ export function HeroGlobe() {
       drawLabel(r.cfg[lang], d[0], d[1], fade, false);
     };
 
+    const drawStatic = () => {
+      const r = routes[CONFIG.reducedRoute] || routes[0];
+      center = [...CONFIG.home];
+      drawGlobeBase();
+      drawTrail(r, 0.7, 0.9, true);
+      drawOrigin(-1);
+      const d = project(r.dest);
+      drawDot(d, 4.5, C.dest, 1);
+      drawLabel(r.cfg[lang], d[0], d[1], 1, true);
+      drawPlane(r, 0.7, 1);
+    };
+
     const renderFrame = (time: number, wall: number) => {
+      const mqReduce =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (mqReduce) {
+        drawStatic();
+        return;
+      }
       const states = routes.map((r) => stateAt(r, time));
       center = cameraAt(time, states);
       drawGlobeBase();
@@ -611,14 +617,17 @@ export function HeroGlobe() {
     readColors();
     renderFrame(0.8, 0.8);
 
-    fetch("/data/topo-land.json")
-      .then((res) => res.json())
+    fetch("/assets/data/land-110m.json")
+      .then((res) => (res.ok ? res.json() : fetch("/data/topo-land.json").then((r) => r.json())))
       .then((topo) => {
         if (!active) return;
         landRings = decodeTopoLand(topo);
+        setReady(true);
         renderFrame(((clock * TIMELINE) / CONFIG.cycleSeconds) % TIMELINE, clock);
       })
-      .catch(() => {});
+      .catch(() => {
+        setReady(true);
+      });
 
     if (!paused) {
       raf = requestAnimationFrame(tick);
@@ -639,45 +648,14 @@ export function HeroGlobe() {
   }, [lang, theme, paused]);
 
   return (
-    <section
-      id="hero"
-      className="py-10 md:py-12 overflow-hidden"
-      style={{ ["--gsize" as string]: "clamp(380px, 48vw, 600px)" }}
-    >
-      <div className="max-w-[1160px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-8 items-center">
-        <div className="min-w-0 relative z-10">
-          <p className="font-bold text-xs leading-4 tracking-[1px] uppercase text-brand-ink">
-            {t.hero.eyebrow}
-          </p>
-          <h1 className="font-display font-extrabold text-[clamp(34px,5.2vw,56px)] leading-[1.1] tracking-[-1.2px] mt-4 text-ink">
-            {t.tagline}
-          </h1>
-
-          <p className="mt-5 flex flex-wrap gap-x-2 gap-y-1.5 items-baseline font-semibold text-[17px] leading-7 text-ink-muted">
-            <span>{t.hero.rotPre}</span>
-            <span className="inline-block overflow-hidden h-7 align-bottom">
-              <span
-                className={`inline-block font-display font-extrabold text-brand-ink transition-all duration-300 ${
-                  rotOut
-                    ? "-translate-y-full opacity-0"
-                    : "translate-y-0 opacity-100"
-                }`}
-              >
-                {t.hero.rotCountries[rotIndex]}
-              </span>
-            </span>
-          </p>
-
-          <p className="mt-4 text-ink-muted text-lg leading-7 max-w-[52ch]">
-            {t.hero.sub}
-          </p>
-
-          <div className="flex flex-wrap gap-3 mt-8">
-            <a
-              id="hero-cta-book"
-              href="#konsultasi"
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-md bg-sun text-on-sun hover:bg-ember font-bold text-[15px] leading-none transition-all hover:shadow-md"
-            >
+    <section className="hero" id="hero">
+      <div className="wrap hero-in">
+        <div className="hero-copy">
+          <p className="eyebrow">{t.hero.eyebrow}</p>
+          <h1>{t.tagline}</h1>
+          <p className="lead">{t.hero.sub}</p>
+          <div className="cta-row">
+            <a id="hero-cta-book" className="btn btn-accent" href="#konsultasi">
               <span>{t.hero.ctaBook}</span>
               <svg
                 width="18"
@@ -693,37 +671,84 @@ export function HeroGlobe() {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </a>
-            <a
-              id="hero-cta-aura"
-              href="#aura"
-              className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-md border-[1.5px] border-line-strong bg-surface-raised text-ink hover:bg-brand-soft font-bold text-[15px] leading-none transition-all"
-            >
+            <a id="hero-cta-aura" className="btn btn-secondary" href="#aura">
               {t.hero.ctaAsk}
             </a>
           </div>
         </div>
 
-        <div
-          ref={wrapRef}
-          id="globe-container"
-          className="relative justify-self-center lg:justify-self-end w-full max-w-[560px] h-[340px] sm:h-[420px] lg:h-[520px]"
-        >
+        <div ref={wrapRef} className="kglobe" id="kglobe">
+          {!ready && (
+            <svg
+              className="kglobe-fallback"
+              id="globe-fallback"
+              viewBox="0 0 420 420"
+              role="img"
+              aria-labelledby="globe-fallback-title"
+            >
+              <title id="globe-fallback-title">
+                Ilustrasi globe: pesawat kertas terbang dari Indonesia menuju
+                Australia. Illustration of a globe: a paper plane flying from
+                Indonesia to Australia.
+              </title>
+              <circle className="f-sea" cx="210" cy="210" r="200" />
+              <path
+                className="f-route"
+                d="M174.8,241.8L220.5,277.7L265.4,307.8"
+              />
+              <circle className="f-origin" cx="174.8" cy="241.8" r="5.5" />
+              <circle className="f-dest" cx="303.3" cy="328.6" r="4.5" />
+              <path
+                className="f-plane"
+                transform="translate(267.9 309.4) rotate(30.8) scale(11)"
+                vectorEffect="non-scaling-stroke"
+                d="M1 0L-1-.62L-.55 0L-1 .62Z"
+              />
+              <g>
+                <rect
+                  className="f-chip"
+                  x="135.8"
+                  y="205.8"
+                  width="78"
+                  height="24"
+                  rx="12"
+                />
+                <text x="174.8" y="221.8">
+                  Indonesia
+                </text>
+              </g>
+              <g>
+                <rect
+                  className="f-chip"
+                  x="266.3"
+                  y="340.6"
+                  width="74"
+                  height="24"
+                  rx="12"
+                />
+                <text x="303.3" y="356.6">
+                  Australia
+                </text>
+              </g>
+            </svg>
+          )}
           <canvas
             ref={canvasRef}
+            id="globe-canvas"
             role="img"
             aria-label={t.hero.globeAria}
-            className="absolute inset-0 w-full h-full block"
           />
           <button
-            id="globe-pause-toggle"
             type="button"
+            className="kglobe-toggle"
+            id="globe-toggle"
             aria-pressed={paused}
             aria-label={paused ? t.hero.play : t.hero.pause}
             onClick={() => setPaused((p) => !p)}
-            className="absolute left-2 bottom-2 z-10 w-[44px] h-[44px] grid place-items-center border-[1.5px] border-line-strong rounded-pill bg-surface-raised text-ink hover:bg-brand-soft transition-colors cursor-pointer"
           >
             {paused ? (
               <svg
+                id="ico-play"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
@@ -734,6 +759,7 @@ export function HeroGlobe() {
               </svg>
             ) : (
               <svg
+                id="ico-pause"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"

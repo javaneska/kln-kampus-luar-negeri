@@ -4,7 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { CountryCode } from "@/data/unis";
 import { Language, TRANSLATIONS } from "@/data/i18n";
 
-export type { Language, Language as Lang };
+export type { Language };
+export type Lang = Language;
 
 interface AppContextType {
   lang: Language;

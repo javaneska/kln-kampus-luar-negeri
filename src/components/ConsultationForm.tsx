@@ -23,10 +23,11 @@ export function ConsultationForm() {
   }>({});
   const [submitting, setSubmitting] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
+  const [summaryText, setSummaryText] = useState("");
   const [waHandoffUrl, setWaHandoffUrl] = useState("https://wa.me/16026005671");
   const [okShown, setOkShown] = useState(false);
+  const [copiedMsg, setCopiedMsg] = useState(false);
 
-  // Sync shortlisted countries into the country field if user hasn't typed custom text
   useEffect(() => {
     if (shortlist.length > 0 && !country) {
       const names = shortlist
@@ -71,6 +72,41 @@ export function ConsultationForm() {
         ? t.formSection.oS3
         : t.formSection.oUnsure;
 
+    const lines =
+      lang === "en"
+        ? [
+            "Hello KLN, I would like to schedule a consultation.",
+            `Name: ${name.trim()}`,
+            `WhatsApp: ${wa.trim()}`,
+            `Email: ${mail.trim()}`,
+            `Study level: ${levelLabel}`,
+          ]
+        : [
+            "Halo KLN, saya ingin menjadwalkan konsultasi.",
+            `Nama: ${name.trim()}`,
+            `WhatsApp: ${wa.trim()}`,
+            `Email: ${mail.trim()}`,
+            `Jenjang yang diminati: ${levelLabel}`,
+          ];
+
+    if (country.trim()) {
+      lines.push(
+        `${lang === "en" ? "Country of interest" : "Negara yang diminati"}: ${country.trim()}`
+      );
+    }
+    if (plan.trim()) {
+      lines.push(
+        `${lang === "en" ? "Plan & questions" : "Rencana dan pertanyaan"}: ${plan.trim()}`
+      );
+    }
+
+    const msgText = lines.join("\n");
+    setSummaryText(msgText);
+    const defaultWaUrl = `https://wa.me/16026005671?text=${encodeURIComponent(
+      msgText
+    )}`;
+    setWaHandoffUrl(defaultWaUrl);
+
     try {
       const res = await fetch("/api/consultation", {
         method: "POST",
@@ -99,6 +135,14 @@ export function ConsultationForm() {
     }
   };
 
+  const handleCopySummary = () => {
+    try {
+      navigator.clipboard.writeText(summaryText);
+      setCopiedMsg(true);
+      setTimeout(() => setCopiedMsg(false), 1500);
+    } catch {}
+  };
+
   const handleReset = () => {
     setOkShown(false);
     setName("");
@@ -110,23 +154,16 @@ export function ConsultationForm() {
   };
 
   return (
-    <section id="konsultasi" className="py-16 md:py-20 bg-brand text-on-brand">
-      <div className="max-w-[1160px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-10 lg:gap-14 items-start">
-        <div className="grid gap-4">
-          <p className="font-bold text-xs leading-4 tracking-[1px] uppercase text-sun">
-            {t.formSection.eyebrow}
-          </p>
-          <h2 className="font-display font-extrabold text-[clamp(28px,4vw,40px)] leading-[1.15] tracking-[-0.6px]">
-            {t.formSection.title}
-          </h2>
-          <p className="text-lg leading-7 opacity-90 max-w-[56ch]">
-            {t.formSection.lead}
-          </p>
-          <ul className="list-none m-0 mt-2 p-0 grid gap-2.5">
+    <section className="sec consult" id="konsultasi">
+      <div className="wrap form-in">
+        <div className="form-copy">
+          <p className="eyebrow">{t.formSection.eyebrow}</p>
+          <h2 className="h2">{t.formSection.title}</h2>
+          <p className="lead">{t.formSection.lead}</p>
+          <ul className="ticks">
             {[t.formSection.b1, t.formSection.b2].map((b, idx) => (
-              <li key={idx} className="flex gap-2.5 items-start">
+              <li key={idx}>
                 <svg
-                  className="flex-none mt-[3px] text-sun"
                   width="20"
                   height="20"
                   viewBox="0 0 24 24"
@@ -145,79 +182,70 @@ export function ConsultationForm() {
           </ul>
         </div>
 
-        <div className="bg-surface-raised text-ink rounded-xl p-6 sm:p-8 shadow-md">
+        <div className="formcard">
           {!okShown ? (
-            <form id="consultation-form" onSubmit={handleSubmit} noValidate className="grid gap-5">
-              <div className="grid gap-1.5">
-                <label htmlFor="f-name" className="font-semibold text-sm leading-5">
-                  {t.formSection.lName}
-                </label>
+            <form id="form" onSubmit={handleSubmit} noValidate>
+              <div className="field">
+                <label htmlFor="f-name">{t.formSection.lName}</label>
                 <input
+                  className="in"
                   id="f-name"
                   name="name"
                   type="text"
                   autoComplete="name"
+                  required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   aria-invalid={Boolean(errors.name)}
-                  className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-md border-[1.5px] bg-surface-raised text-ink text-base ${
-                    errors.name ? "border-danger border-2" : "border-line-strong"
-                  }`}
                 />
                 {errors.name && (
-                  <p className="flex gap-1.5 items-start text-[13px] leading-[18px] text-danger font-semibold m-0">
+                  <p className="err" id="e-name">
                     <span aria-hidden="true">!</span>
                     <span>{errors.name}</span>
                   </p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="grid gap-1.5">
-                  <label htmlFor="f-wa" className="font-semibold text-sm leading-5">
-                    {t.formSection.lWa}
-                  </label>
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="f-wa">{t.formSection.lWa}</label>
                   <input
+                    className="in"
                     id="f-wa"
                     name="wa"
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
                     placeholder="0812 0000 0000"
+                    required
                     value={wa}
                     onChange={(e) => setWa(e.target.value)}
                     aria-invalid={Boolean(errors.wa)}
-                    className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-md border-[1.5px] bg-surface-raised text-ink text-base placeholder:text-ink-muted ${
-                      errors.wa ? "border-danger border-2" : "border-line-strong"
-                    }`}
                   />
                   {errors.wa && (
-                    <p className="flex gap-1.5 items-start text-[13px] leading-[18px] text-danger font-semibold m-0">
+                    <p className="err" id="e-wa">
                       <span aria-hidden="true">!</span>
                       <span>{errors.wa}</span>
                     </p>
                   )}
                 </div>
 
-                <div className="grid gap-1.5">
-                  <label htmlFor="f-mail" className="font-semibold text-sm leading-5">
-                    {t.formSection.lMail}
-                  </label>
+                <div className="field">
+                  <label htmlFor="f-mail">{t.formSection.lMail}</label>
                   <input
+                    className="in"
                     id="f-mail"
                     name="mail"
                     type="email"
                     autoComplete="email"
                     placeholder={t.formSection.phMail}
+                    required
                     value={mail}
                     onChange={(e) => setMail(e.target.value)}
                     aria-invalid={Boolean(errors.mail)}
-                    className={`w-full min-h-[48px] px-3.5 py-2.5 rounded-md border-[1.5px] bg-surface-raised text-ink text-base placeholder:text-ink-muted ${
-                      errors.mail ? "border-danger border-2" : "border-line-strong"
-                    }`}
                   />
                   {errors.mail && (
-                    <p className="flex gap-1.5 items-start text-[13px] leading-[18px] text-danger font-semibold m-0">
+                    <p className="err" id="e-mail">
                       <span aria-hidden="true">!</span>
                       <span>{errors.mail}</span>
                     </p>
@@ -225,17 +253,15 @@ export function ConsultationForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="grid gap-1.5">
-                  <label htmlFor="f-level" className="font-semibold text-sm leading-5">
-                    {t.formSection.lLevel}
-                  </label>
+              <div className="grid2">
+                <div className="field">
+                  <label htmlFor="f-level">{t.formSection.lLevel}</label>
                   <select
+                    className="in"
                     id="f-level"
                     name="level"
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    className="w-full min-h-[48px] px-3.5 py-2.5 rounded-md border-[1.5px] border-line-strong bg-surface-raised text-ink text-base"
                   >
                     <option value="s1">{t.formSection.oS1}</option>
                     <option value="s2">{t.formSection.oS2}</option>
@@ -244,113 +270,95 @@ export function ConsultationForm() {
                   </select>
                 </div>
 
-                <div className="grid gap-1.5">
-                  <label htmlFor="f-country" className="font-semibold text-sm leading-5">
-                    {t.formSection.lCountry}
-                  </label>
+                <div className="field">
+                  <label htmlFor="f-country">{t.formSection.lCountry}</label>
                   <input
+                    className="in"
                     id="f-country"
                     name="country"
                     type="text"
                     placeholder={t.formSection.phCountry}
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full min-h-[48px] px-3.5 py-2.5 rounded-md border-[1.5px] border-line-strong bg-surface-raised text-ink text-base placeholder:text-ink-muted"
                   />
                 </div>
               </div>
 
-              <div className="grid gap-1.5">
-                <label htmlFor="f-plan" className="font-semibold text-sm leading-5">
-                  {t.formSection.lPlan}
-                </label>
+              <div className="field">
+                <label htmlFor="f-plan">{t.formSection.lPlan}</label>
                 <textarea
+                  className="in"
                   id="f-plan"
                   name="plan"
                   placeholder={t.formSection.phPlan}
                   value={plan}
                   onChange={(e) => setPlan(e.target.value)}
-                  className="w-full min-h-[104px] px-3.5 py-2.5 rounded-md border-[1.5px] border-line-strong bg-surface-raised text-ink text-base placeholder:text-ink-muted resize-y"
                 />
-                <p className="text-[13px] leading-[18px] text-ink-muted m-0">
+                <p className="help" id="h-plan">
                   {t.formSection.hPlan}
                 </p>
               </div>
 
-              <div className="grid gap-1.5">
-                <label
-                  htmlFor="f-consent"
-                  className="flex gap-3 items-start text-sm leading-[22px] cursor-pointer"
-                >
+              <div className="field">
+                <label className="consent" htmlFor="f-consent">
                   <input
                     id="f-consent"
                     name="consent"
                     type="checkbox"
+                    required
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
-                    className="flex-none w-6 h-6 m-0 accent-brand"
                   />
                   <span>
                     {t.formSection.cText}{" "}
-                    <Link
-                      href={t.footer.privacyUrl}
-                      className="text-brand-ink underline underline-offset-2 font-semibold"
-                    >
+                    <Link href={t.footer.privacyUrl}>
                       {t.formSection.cLink}
                     </Link>
                     {t.formSection.cAnd}
-                    <Link
-                      href={t.footer.termsUrl}
-                      className="text-brand-ink underline underline-offset-2 font-semibold"
-                    >
+                    <Link href={t.footer.termsUrl}>
                       {t.formSection.cTerms}
                     </Link>
                     .
                   </span>
                 </label>
-                <p className="text-[13px] leading-[18px] text-ink-muted m-0">
+                <p className="help" id="h-consent">
                   {t.formSection.cUnder18}
                 </p>
                 {errors.consent && (
-                  <p className="flex gap-1.5 items-start text-[13px] leading-[18px] text-danger font-semibold m-0">
+                  <p className="err" id="e-consent">
                     <span aria-hidden="true">!</span>
                     <span>{errors.consent}</span>
                   </p>
                 )}
               </div>
 
-              <div>
-                <button
-                  id="form-submit-btn"
-                  type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-md bg-brand text-on-brand hover:bg-brand-hover font-bold text-[15px] leading-none transition-all cursor-pointer"
+              <button
+                id="form-submit-btn"
+                type="submit"
+                disabled={submitting}
+                className="btn btn-primary"
+              >
+                <span>
+                  {submitting ? t.formSection.submitting : t.formSection.submit}
+                </span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  <span>
-                    {submitting ? t.formSection.submitting : t.formSection.submit}
-                  </span>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </button>
-              </div>
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
             </form>
           ) : (
-            <div className="grid gap-4 justify-items-start" role="status" aria-live="polite">
-              <span
-                aria-hidden="true"
-                className="grid place-items-center w-14 h-14 rounded-full bg-leaf-soft text-leaf-ink"
-              >
+            <div className="ok" id="ok" role="status" aria-live="polite">
+              <span className="badge" aria-hidden="true">
                 <svg
                   width="28"
                   height="28"
@@ -364,29 +372,55 @@ export function ConsultationForm() {
                   <path d="M5 12.5l4.5 4.5L19 7.5" />
                 </svg>
               </span>
-              <h3 className="font-display font-extrabold text-[26px] leading-8 tracking-[-0.3px] text-ink">
-                {t.formSection.okTitle(submittedName)}
+              <h3 id="ok-title">
+                {lang === "en"
+                  ? `Ready to send, ${submittedName}.`
+                  : `Ringkasan siap dikirim, ${submittedName}.`}
               </h3>
-              <p className="text-ink-muted">{t.formSection.okBody}</p>
-              <div className="flex flex-wrap gap-3 pt-1">
+              <p id="ok-body">
+                {lang === "en"
+                  ? "Press the WhatsApp button below to send this summary to a KLN advisor."
+                  : "Tekan tombol WhatsApp di bawah untuk mengirim ringkasan ini ke konselor KLN."}
+              </p>
+              <pre className="ok-msg" id="ok-msg">
+                {summaryText}
+              </pre>
+              <div className="prow">
                 <a
-                  id="form-wa-handoff"
+                  className="btn btn-primary"
+                  id="ok-wa"
                   href={waHandoffUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-md bg-brand text-on-brand hover:bg-brand-hover font-bold text-sm"
                 >
-                  {t.formSection.waDirect}
+                  {t.formSection.okWa}
                 </a>
                 <button
-                  id="form-reset-btn"
                   type="button"
+                  className="btn btn-secondary"
+                  id="ok-copy"
+                  onClick={handleCopySummary}
+                >
+                  {copiedMsg
+                    ? t.footer.copied
+                    : lang === "en"
+                    ? "Copy message"
+                    : "Salin isi pesan"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  id="again"
                   onClick={handleReset}
-                  className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-md border-[1.5px] border-line-strong bg-surface-raised text-ink hover:bg-brand-soft font-bold text-sm cursor-pointer"
                 >
                   {t.formSection.again}
                 </button>
               </div>
+              <p className="help" id="ok-note">
+                {lang === "en"
+                  ? "Prefer email? Copy the message above and send it to info@kampusluarnegeri.com."
+                  : "Lebih nyaman lewat email? Salin isi pesan di atas lalu kirim ke info@kampusluarnegeri.com."}
+              </p>
             </div>
           )}
         </div>

@@ -4,16 +4,16 @@ import React, { useEffect } from "react";
 import { Navbar } from "./Navbar";
 import { HeroGlobe } from "./HeroGlobe";
 import { CountryRibbon } from "./CountryRibbon";
-import { DestinationCards } from "./DestinationCards";
 import { StepsSection } from "./StepsSection";
+import { DestinationCards } from "./DestinationCards";
 import { AuraChat } from "./AuraChat";
 import { ConsultationForm } from "./ConsultationForm";
 import { Footer } from "./Footer";
 import { ShortlistBar } from "./ShortlistBar";
-import { useApp, Language } from "@/context/AppContext";
+import { useApp, Lang } from "@/context/AppContext";
 
-export function HomeView({ initialLang }: { initialLang?: Language }) {
-  const { setLang } = useApp();
+export function HomeView({ initialLang }: { initialLang?: Lang }) {
+  const { setLang, shortlist } = useApp();
 
   useEffect(() => {
     if (initialLang) {
@@ -22,13 +22,13 @@ export function HomeView({ initialLang }: { initialLang?: Language }) {
   }, [initialLang, setLang]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-surface-100 text-ink">
+    <div className={shortlist.length > 0 ? "has-short" : ""}>
       <Navbar />
-      <main id="main" className="flex-1">
+      <main id="top">
         <HeroGlobe />
         <CountryRibbon />
-        <DestinationCards />
         <StepsSection />
+        <DestinationCards />
         <AuraChat />
         <ConsultationForm />
       </main>

@@ -1,0 +1,4 @@
+d3-array 3.2.4, d3-geo 3.1.1 (ISC License, Copyright Mike Bostock)
+topojson-client 3.1.0 (ISC License, Copyright Mike Bostock)
+world-atlas 2.0.2 land-110m (ISC License; data Natural Earth, public domain)
+Montserrat, Plus Jakarta Sans (SIL Open Font License 1.1)
