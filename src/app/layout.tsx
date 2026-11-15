@@ -53,9 +53,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-surface-100 text-ink font-sans antialiased">
-        <a href="#main" className="skip-link">
-          Langsung ke isi utama / Skip to main content
-        </a>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

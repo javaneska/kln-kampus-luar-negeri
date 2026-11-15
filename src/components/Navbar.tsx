@@ -40,14 +40,10 @@ export function Navbar() {
   const consultHref = isHome ? "#konsultasi" : `${homeHref}#konsultasi`;
 
   return (
-    <>
-      <a className="skip" href="#top">
-        {lang === "en" ? "Skip to content" : "Langsung ke isi"}
-      </a>
-      <header
-        id="bar"
-        className={`bar ${scrolled ? "scrolled" : ""} ${menuOpen ? "open" : ""}`}
-      >
+    <header
+      id="bar"
+      className={`bar ${scrolled ? "scrolled" : ""} ${menuOpen ? "open" : ""}`}
+    >
         <div className="wrap">
           <div className="bar-in">
             <Link
@@ -204,6 +200,5 @@ export function Navbar() {
           style={{ transform: `scaleX(${progress.toFixed(3)})` }}
         />
       </header>
-    </>
   );
 }
